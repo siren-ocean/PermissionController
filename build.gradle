@@ -153,15 +153,6 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
-        variant.mergeResourcesProvider.configure {
-            doFirst {
-                delete file('res/values/overlayable.xml')
-            }
-        }
-    }
-
-
     //移除overlayable.xml 但是不影响git仓库
     applicationVariants.all { variant ->
         variant.mergeResourcesProvider.configure {
