@@ -1,0 +1,152 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.protobuf)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.android.library) apply false
+}
+
+protobuf {
+    protoc {
+        artifact = libs.protoc.get()
+    }
+
+    generateProtoTasks {
+        all().configureEach { task ->
+            task.builtins {
+                remove("java")
+                java {}
+            }
+        }
+    }
+}
+
+android {
+    compileSdk COMPILE_SDK.toInteger()
+
+    defaultConfig {
+        applicationId "com.android.permissioncontroller"
+        minSdk MIN_SDK_VERSION.toInteger()
+        targetSdk TARGET_SDK_VERSION.toInteger()
+        versionCode 330000000
+        versionName "33 system image"
+    }
+
+    signingConfigs {
+        platform {
+            storeFile file("platform.keystore")
+            storePassword '123456'
+            keyAlias 'platform'
+            keyPassword '123456'
+        }
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled false
+            signingConfig signingConfigs.platform
+        }
+
+        debug {
+            debuggable true
+            minifyEnabled false
+            signingConfig signingConfigs.platform
+        }
+
+        applicationVariants.all { variant ->
+            variant.outputs.all {
+                outputFileName = "PermissionController.apk"
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+//    kotlinOptions {
+//        jvmTarget = "1.8"
+//        freeCompilerArgs += [
+//                '-Xjvm-default=all-compatibility'
+//        ]
+//    }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            proto.srcDirs = ['protos']
+            res.srcDirs = ['res']
+            manifest.srcFile 'AndroidManifest.xml'
+        }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
+
+dependencies {
+    compileOnly files('libs/framework.jar')
+    compileOnly files('libs/libprotobuf-java-lite.jar')
+    compileOnly files('libs/android.car-stubs.jar')
+    implementation files('libs/libprotobuf-java-nano.jar')
+    implementation files('libs/permissioncontroller-statsd.jar')
+    implementation files('libs/modules-utils-build_system.jar')
+
+    implementation project(':SettingsLib:HelpUtils')
+    implementation project(':SettingsLib:RestrictedLockUtils')
+    implementation project(':SettingsLib:AppPreference')
+    implementation project(':SettingsLib:SearchWidget')
+    implementation project(':SettingsLib:LayoutPreference')
+    implementation project(':SettingsLib:BarChartPreference')
+    implementation project(':SettingsLib:ActionBarShadow')
+    implementation project(':SettingsLib:ProgressBar')
+    implementation project(':SettingsLib:CollapsingToolbarBaseActivity')
+    implementation project(':SettingsLib:SettingsTheme')
+    implementation project(':SettingsLib:FooterPreference')
+    implementation project(':SettingsLib:SelectorWithWidgetPreference')
+    implementation project(':SettingsLib:TwoTargetPreference')
+    implementation project(':SettingsLib:Utils')
+    implementation project(':iconloaderlib')
+
+    implementation(libs.leanback.preference, {
+        exclude group: 'androidx.preference', module: 'preference'
+    })
+
+    implementation libs.car.ui.lib
+    implementation libs.preference
+    implementation libs.recyclerview
+    implementation libs.appcompat
+    implementation libs.constraintlayout
+    implementation libs.constraintlayout.solver
+    implementation libs.leanback
+    implementation libs.core.runtime
+    implementation libs.lifecycle.extensions
+    implementation libs.navigation.fragment.ktx
+    implementation libs.navigation.ui.ktx
+    implementation libs.navigation.common.ktx
+    implementation libs.navigation.runtime.ktx
+    implementation libs.cardview
+
+    implementation libs.protobuf.java
+    implementation libs.protoc
+
+    implementation libs.kotlinx.coroutines.android
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlin.reflect
+    implementation libs.core.ktx
+}
+
+allprojects {
+    tasks.withType(JavaCompile).configureEach { task ->
+        task.doFirst {
+            def originalClasspath = options.bootstrapClasspath ?: files()
+            options.bootstrapClasspath = files(
+                    file("${rootDir}/libs/framework.jar"),
+            ).plus(originalClasspath)
+        }
+    }
+}
