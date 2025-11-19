@@ -1,38 +1,38 @@
-# English | [中文文档](README.cn.md)
+# [English](README.md) | 中文文档
 ## PermissionController from android-13.0.0_r31
-### Building PermissionController outside AOSP source in Android Studio
+### PermissionController 脱离源码在Android Studio的编译
 
-### Support Notes
-* Instead of changing the project's directory structure, we add additional configurations and dependencies to build Gradle environment support
+### 支持说明
+* 不试图改变项目本身的目录结构，而是通过添加额外的配置和依赖构建Gradle环境支持
 
-## Building with Command Line
-### Environment Requirements
+## 使用命令编译
+### 环境依赖
 *  Gradle 7.5
 *  JDK version 11
 
 ```
-# Setup build environment
+# 构建环境
 gradle wrapper
 
-# Build and package
+# 打包编译
 ./gradlew assemble
 ```
 
 
-## Building in Android Studio
-### Recommended
+## 在Android Studio上编译
+### 推荐使用
 *  Android Studio Koala & JDK version 11
 
-#### Step 1: Execute Build APK in Android Studio to compile the APK
+#### 第一步：执行Android Studio上Build APK的操作, 编译出apk
 
-#### Step 2: Create system directory and push the APK to that directory.
-### PS: Since newer versions of PermissionController have been migrated to APEX for iterative updates, the directory cannot be replaced via push. You need to create a system path yourself and then overwrite it. You can check if PermissionController is in an APEX directory using the following command.
+#### 第二步：创建系统目录，并将apk push到该目录下。
+### PS: 鉴于高版本PermissionController已经换成APEX进行迭代更新，所以无法对该目录进行push替换，需要自己创建系统路径，再对它进行覆盖。通过如下命令可以查看PermissionController是否为apex目录。
 ```
 adb shell pm path com.android.permissioncontroller  
 ```
 ![avatar](images/apex_path.png)
 
-####  Create /system/priv-app/PermissionController directory and overwrite the APEX implementation.
+####  创建/system/priv-app/PermissionController目录，并对apex实现覆盖更新。
 ```
 adb root
 
@@ -44,16 +44,16 @@ adb push PermissionController.apk /system/priv-app/PermissionController/
 
 ```
 
-#### Step 3: Push permission file to etc directory
+#### 第三步：需要push权限文件到etc目录下
 ```
 adb push com.android.permissioncontroller.xml /system/etc/permissions/
 
 adb reboot
 ```
 
-## Build Steps
+## 构建步骤
 
-### Step 1: Add Static Dependencies
+### Step1：引入静态依赖
 ##### @framework.jar:
 ```
 // android-13/out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes-header.jar
@@ -103,8 +103,8 @@ implementation files('libs/modules-utils-build_system.jar')
 
 
 
-### Step 2: Add Module Dependencies
-###### You need to import the code from the specific paths directly into the project as Module dependencies. During build, you can reference them via `implementation project`, or you can generate AAR files via `gradle build` and place them in the libs folder as static packages.
+### Step2：引入Module
+###### 需要将具体路径下的代码直接导入到项目中作为Module依赖, 构建的时候可以直接通过implementation project引用，或者也可以gradle build生成aar,再放置到libs文件夹中，作为静态包使用。
 
 ##### @iconloaderlib: 
 ```
@@ -138,7 +138,7 @@ include 'SettingsLib:SelectorWithWidgetPreference'
 ![avatar](images/SettingsLib.png)
 
 
-### Step 3: Extract the proto files separately as an independent directory for reference, because the proto files in the original path specify paths based on AOSP, which will cause reference failures during compilation.
+### Step3：将proto文件单独抽取出来，作为独立的目录进行引用，因为原路径下的proto指定了基于AOSP下的路径，会导致编译时引用失败。
 ```
 sourceSets {
     main {
@@ -149,16 +149,16 @@ sourceSets {
 }
 ```
 
-## Generate platform.keystore Default Signature
+## 生成platform.keystore默认签名
 
-Find the signing certificates in the android-13/build/target/product/security path and use [keytool-importkeypair](https://github.com/getfatday/keytool-importkeypair) to generate the keystore.
-Execute the following command:  
+在android-13/build/target/product/security路径下找到签名证书，并使用 [keytool-importkeypair](https://github.com/getfatday/keytool-importkeypair) 生成keystore,
+执行如下命令：  
 
 ```
 ./keytool-importkeypair -k platform.keystore -p 123456 -pk8 platform.pk8 -cert platform.x509.pem -alias platform
 ```
 
-And add the following code to the gradle configuration:
+并将以下代码添加到gradle配置中：
 
 ```
     signingConfigs {
@@ -187,7 +187,7 @@ And add the following code to the gradle configuration:
 
 ---
 
-### Related Projects
+### 关联项目
 * [Settings](https://github.com/siren-ocean/Settings)
 * [Launcher3](https://github.com/siren-ocean/Launcher3)
 * [DocumentsUI](https://github.com/siren-ocean/DocumentsUI)
