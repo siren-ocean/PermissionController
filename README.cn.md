@@ -1,26 +1,26 @@
-# English | [中文文档](README.cn.md)
+# [English](README.md) | 中文文档
 ## PermissionController from android-11.0.0_r10
-### Building PermissionController outside AOSP source in Android Studio
+### PermissionController 脱离源码在Android Studio的编译
 
-### Support Notes
-* Instead of changing the project's directory structure, we add additional configurations and dependencies to build Gradle environment support
-* The runtime appearance will differ from the native version in terms of styling, as the theme styles compiled by Android Studio differ from the system's default styles (as shown below)
+### 支持说明
+* 不试图改变项目本身的目录结构，而是通过添加额外的配置和依赖构建Gradle环境支持
+* 运行的效果会与原生的有样式上的差异，这是由于AS编译出来的主题样式与系统的默认的样式不同（如下图）
 
 
-### Pixel2 Runtime Comparison: Gradle Build VS Android.bp Build
+###  pixel2运行效果：Gradle编译 VS Android.bp编译
 ---
 <img src="images/pixel2_permissioncontroller_gradle.png" width = "225" height = "400"/> <img src="images/pixel2_permissioncontroller_original.png" width = "225" height = "400"/>
 
 ---
 
 
-## Execution Steps
-#### Step 1: Check the location of PermissionController to see if it can be pushed directly
+## 执行步骤
+#### 第一步：查询PermissionController所处的位置，是否可以直接push
 ```
 adb shell pm path com.android.permissioncontroller  
 ```
 ![avatar](images/apex_path.png)
-### Step 2: Since newer versions of PermissionController have been migrated to APEX for iterative updates, the directory cannot be replaced via push. You need to create a system path yourself and then overwrite it.
+### 第二步：由于高版本PermissionController已经换成APEX进行迭代更新，所以无法对该目录进行push替换，需要自己创建系统路径，再对它进行覆盖。
 
 ```
 adb root
@@ -34,14 +34,14 @@ adb push PermissionController.apk /system/priv-app/PermissionController/
 adb reboot
 ```
 
-### PS: If the system fails to boot after remount, it may be an AVC permission issue. In this case, you can execute the following operation:
+### PS: 如果系统出现在remount之后起不来，可能是出现avc权限问题，这时候可以执行一下操作
 ```
 adb shell setenforce 0
 ```
 
-## Build Steps
+## 构建步骤
 
-### Step 1: Add Static Dependencies
+### Step1：引入静态依赖
 ##### @framework.jar:
 ```
 // AOSP/android-11/out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes-header.jar
@@ -58,7 +58,7 @@ implementation(name: 'preference-1.2.0-alpha01', ext: 'aar')
 
 
 ![avatar](images/preference-1.2.0-alpha01.png)
-###### ps: androidx.preference is not easily referenced via the following method, so we use static dependency instead
+###### ps: androidx.preference 不容易通过以下方式去引用，故换成静态
 ```
 ## implementation 'androidx.preference:preference:1.2.0-alpha01'
 ```
@@ -86,8 +86,8 @@ implementation files('libs/permissioncontroller-statsd.jar')
 ```
 ![avatar](images/permissioncontroller-statsd.png)
 
-### Step 2: Add Module Dependencies
-###### You need to import the code from the specific paths directly into the project as Module dependencies. During build, you can reference them via `implementation project`, or you can generate AAR files via `gradle build` and place them in the libs folder as static packages.
+### Step2：引入Module
+###### 需要将具体路径下的代码直接导入到项目中作为Module依赖, 构建的时候可以直接通过implementation project引用，或者也可以gradle build生成aar,再放置到libs文件夹中，作为静态包使用。
 
 ##### @iconloaderlib: 
 ```
@@ -120,7 +120,7 @@ implementation project(':SettingsLib:Utils')
 ```
 ![avatar](images/SettingsLib.png)
 
-### Step 3: Extract the proto files separately as an independent directory for reference, because the proto files in the original path specify paths based on AOSP, which will cause reference failures during compilation.
+### Step3：将proto文件单独抽取出来，作为独立的目录进行引用，因为原路径下的proto指定了基于AOSP下的路径，会导致编译时引用失败。
 ```
 sourceSets {
     main {
@@ -131,16 +131,16 @@ sourceSets {
 }
 ```
 
-## Generate platform.keystore Default Signature
+## 生成platform.keystore默认签名
 
-Find the signing certificates in the AOSP/android-11/build/target/product/security path and use [keytool-importkeypair](https://github.com/getfatday/keytool-importkeypair) to generate the keystore.
-Execute the following command:  
+在AOSP/android-11/build/target/product/security路径下找到签名证书，并使用 [keytool-importkeypair](https://github.com/getfatday/keytool-importkeypair) 生成keystore,
+执行如下命令：  
 
 ```
 ./keytool-importkeypair -k platform.keystore -p 123456 -pk8 platform.pk8 -cert platform.x509.pem -alias platform
 ```
 
-And add the following code to the gradle configuration:
+并将以下代码添加到gradle配置中：
 
 ```
     signingConfigs {
@@ -168,7 +168,7 @@ And add the following code to the gradle configuration:
 ```
 
 ### PS:
-##### Before the application is compiled, the Gradle script will actively delete and ignore overlayable.xml from participating in compilation
+##### 应用在编译之前，Gradle脚本会主动删除并忽略掉overlayable.xml参与编译
 ```
 applicationVariants.all { variant ->
     variant.mergeResourcesProvider.configure {
@@ -183,7 +183,7 @@ applicationVariants.all { variant ->
 }
 ```  
 
-##### Ignore and restore a single file
+##### 忽略和还原单个文件
 ``` 
 git update-index --assume-unchanged $path
 git update-index --no-assume-unchanged $path
@@ -191,7 +191,7 @@ git update-index --no-assume-unchanged $path
 
 ---
 
-### Related Projects
+### 关联项目
 * [Settings](https://github.com/siren-ocean/Settings)
 * [Launcher3](https://github.com/siren-ocean/Launcher3)
 * [DocumentsUI](https://github.com/siren-ocean/DocumentsUI)
