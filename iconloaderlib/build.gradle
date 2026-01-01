@@ -1,14 +1,9 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion COMPILE_SDK
-    buildToolsVersion BUILD_TOOLS_VERSION
-
+    namespace "com.android.launcher3.icons"
     defaultConfig {
-        minSdkVersion 26
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        vectorDrawables.useSupportLibrary = true
     }
 
     sourceSets {
@@ -26,13 +21,9 @@ android {
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
     }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
-    implementation "androidx.core:core"
+    compileOnly files('../libs/framework.jar')
+    implementation libs.appcompat
 }

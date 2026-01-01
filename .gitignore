@@ -5,3 +5,9 @@ gen/
 .classpath
 .project
 project.properties
+.gradle
+build/
+iconloaderlib/build
+gradlew
+gradlew.bat
+local.properties
